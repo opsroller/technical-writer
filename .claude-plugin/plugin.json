@@ -1,0 +1,16 @@
+{
+  "name": "technical-writer",
+  "version": "0.1.0",
+  "description": "Technical writer: plans, writes, reviews and maintains documentation using the Diataxis framework (tutorials, how-to guides, reference, explanation) and docs-as-code practice.",
+  "author": {
+    "name": "opsroller"
+  },
+  "repository": "https://github.com/opsroller/technical-writer",
+  "license": "GPL-2.0-or-later",
+  "keywords": [
+    "role",
+    "job-function",
+    "documentation",
+    "diataxis"
+  ]
+}
