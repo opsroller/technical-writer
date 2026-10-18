@@ -5,16 +5,17 @@ export const meta = {
   phases: [
     { title: 'Plan', detail: 'classify the change with the compass' },
     { title: 'Write', detail: 'one agent per doc kind' },
-    { title: 'Review', detail: 'one kind per page, links, accuracy' },
+    { title: 'Review', detail: 'landing-page entries, then a read-only review (one kind per page, links, accuracy), one fix round and a re-review' },
   ],
 }
 
-// --- run-modes v1 begin ---
+// --- run-modes v2 begin ---
 const RUN = ((a, realAgent, realPhase, realLog) => {
   const opted = !!(a && typeof a === 'object' && a.run && typeof a.run === 'object')
   const c = opted ? a.run : {}
   const mode = c.mode === 'inline' ? 'inline' : 'agents'
   const results = c.results && typeof c.results === 'object' ? c.results : {}
+  const reviewers = c.reviewers && typeof c.reviewers === 'object' ? c.reviewers : {}
   const only = Array.isArray(c.only) && c.only.length ? c.only.map(String) : null
   const from = c.from ? String(c.from) : null
   const titles = typeof meta !== 'undefined' && meta && Array.isArray(meta.phases) ? meta.phases.map((p) => p.title) : []
@@ -34,6 +35,10 @@ const RUN = ((a, realAgent, realPhase, realLog) => {
   }
   const seen = {}
   const out = {}
+  // Who answered each step marked independent: "subagent" when this run
+  // spawned it, else the reviewer named in run.reviewers, else "self".
+  const by = {}
+  const who = (k) => (typeof reviewers[k] === 'string' && reviewers[k].trim() ? reviewers[k].trim() : 'self')
   const skipped = []
   const next = []
   const logs = []
@@ -45,6 +50,7 @@ const RUN = ((a, realAgent, realPhase, realLog) => {
   const picked = (ph, label) => reached && (!only || only.some((s) => s === ph || s === label || label.startsWith(s + ':')))
   const agent = (prompt, opts) => {
     const op = opts || {}
+    const independent = op.independent === true
     const ph = op.phase || current
     const base = op.label || ph || 'agent'
     seen[base] = (seen[base] || 0) + 1
@@ -52,14 +58,22 @@ const RUN = ((a, realAgent, realPhase, realLog) => {
     let note = null
     if (has(results, key)) {
       const gap = missing(results[key], op.schema)
-      if (!gap) { out[key] = results[key]; return Promise.resolve(results[key]) }
+      if (!gap) { out[key] = results[key]; if (independent) by[key] = who(key); return Promise.resolve(results[key]) }
       note = `answer missing ${gap}; answer this brief again`
     }
     if (!picked(ph, base)) { skipped.push(key); return Promise.resolve(null) }
     if (mode === 'agents') {
-      return realAgent(prompt, opts).then((r) => { if (r !== null && r !== undefined) out[key] = r; return r })
+      const pass = Object.assign({}, op)
+      delete pass.independent
+      return realAgent(prompt, opts ? pass : opts).then((r) => {
+        if (r !== null && r !== undefined) { out[key] = r; if (independent) by[key] = 'subagent' }
+        return r
+      })
     }
-    next.push(note ? { key, phase: ph, prompt, schema: op.schema || null, note } : { key, phase: ph, prompt, schema: op.schema || null })
+    const brief = { key, phase: ph, prompt, schema: op.schema || null }
+    if (independent) brief.independent = true
+    if (note) brief.note = note
+    next.push(brief)
     if (!halting) {
       halting = true
       // Wait 200 microtask turns before pausing, so every sibling in a
@@ -72,19 +86,20 @@ const RUN = ((a, realAgent, realPhase, realLog) => {
   const log = (m) => { logs.push(String(m)); return realLog(m) }
   const finish = (value) => {
     if (!opted) return value
+    const self_reviewed = Object.keys(by).filter((k) => by[k] === 'self')
     if (value === '__run_halted__') {
       return {
-        run: 'inline', status: 'next', next, results: out, skipped, logs,
-        how: 'Do each brief in next yourself, in order: follow its prompt in this session (it may tell you to edit files, commit or push), and shape your answer to its schema when one is given, with every required field. A brief with a note was answered before without the fields it names. Add each answer to results under its key, then run this workflow again with the same args and run.results set to the merged results. Repeat until status is "done".',
+        run: 'inline', status: 'next', next, results: out, reviewers: by, self_reviewed, skipped, logs,
+        how: 'Do each brief in next, in order: follow its prompt in this session (it may tell you to edit files, commit or push), and shape your answer to its schema when one is given, with every required field. A brief marked independent reviews work this run produced, so do not answer it yourself: send its prompt to a reviewer with no part in the work (the project\'s code-reviewer role, a fresh session or a fresh subagent), use their answer, and name them in run.reviewers under its key; if you must answer it yourself, it is listed in self_reviewed and must be reported as self-reviewed. A brief with a note was answered before without the fields it names. Add each answer to results under its key, then run this workflow again with the same args, run.results set to the merged results and run.reviewers to the merged reviewers. Repeat until status is "done".',
       }
     }
-    return { run: mode, status: 'done', result: value, results: out, skipped, logs }
+    return { run: mode, status: 'done', result: value, results: out, reviewers: by, self_reviewed, skipped, logs }
   }
   return { agent, phase, log, finish, halted, error }
 })(typeof args === 'undefined' ? undefined : args, agent, phase, log)
 if (RUN.error) return RUN.error
 const RUN_OUT = await Promise.race([RUN.halted, (async (agent, phase, log) => {
-// --- run-modes v1 end (workflow body follows; close it with the tail line) ---
+// --- run-modes v2 end (workflow body follows; close it with the tail line) ---
 const change = (args && args.change) || ''
 if (!change) return 'Pass args.change: the branch, pull request or description of the change to document.'
 const PLAN = {
@@ -124,6 +139,34 @@ const REVIEW = {
   },
   required: ['status', 'changed', 'open_findings'],
 }
-const review = await agent(`Following the technical-writer docs-review skill, review the docs just written for ${change}:\n${JSON.stringify(written)}\nFirst apply every reported index entry to the landing pages in one edit. Then fix blocking findings directly. Any writer that failed counts as a blocking finding. Return status "blocked" if any blocking finding is still open, otherwise "done", with each open finding as file, rule and fix.`, { schema: REVIEW, phase: 'Review', label: 'review' })
-return review || { status: 'blocked', changed: [], open_findings: ['review agent returned no result; docs unverified'] }
+// The reviewer only reads and reports, so it stays independent of the
+// writing; landing-page entries and fixes are separate editing steps.
+const FINDINGS = {
+  type: 'object',
+  properties: {
+    blocking: { type: 'array', items: { type: 'string' } },
+    other: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['blocking'],
+}
+const FIXED = {
+  type: 'object',
+  properties: {
+    changed: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['changed'],
+}
+const failed = written.filter(w => !w).length
+const indexed = await agent(`Following the technical-writer docs-as-code skill, apply every index entry these writers reported to the landing pages, in one edit per landing page:\n${JSON.stringify(written)}\nChange nothing else. Return the files you changed.`, { schema: FIXED, phase: 'Review', label: 'index' })
+const reviewPrompt = `Following the technical-writer docs-review skill, review the docs just written for ${change}:\n${JSON.stringify(written)}\nRead-only: do not edit, commit or push anything. ${failed ? `${failed} writer(s) returned nothing; count each as a blocking finding. ` : ''}Return each blocking finding as file, rule and fix, and other suggestions separately.`
+let review = await agent(reviewPrompt, { schema: FINDINGS, phase: 'Review', label: 'review', independent: true })
+if (!review) return { status: 'blocked', changed: indexed ? indexed.changed : [], open_findings: ['review agent returned no result; docs unverified'] }
+const changed = [...(indexed ? indexed.changed : [])]
+if (review.blocking.length) {
+  const fixed = await agent(`Following the technical-writer diataxis, technical-style and docs-as-code skills, fix these blocking docs findings for ${change}, touching only the pages they name:\n- ${review.blocking.join('\n- ')}\nReturn the files you changed.`, { schema: FIXED, phase: 'Review', label: 'fix' })
+  if (fixed) changed.push(...fixed.changed)
+  review = await agent(reviewPrompt, { schema: FINDINGS, phase: 'Review', label: 're-review', independent: true })
+  if (!review) return { status: 'blocked', changed, open_findings: ['re-review returned no result; fixes unverified'] }
+}
+return { status: review.blocking.length ? 'blocked' : 'done', changed: [...new Set(changed)], open_findings: review.blocking }
 })(RUN.agent, RUN.phase, RUN.log)]); return RUN.finish(RUN_OUT)
