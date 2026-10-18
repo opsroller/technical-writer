@@ -29,3 +29,25 @@ https://www.writethedocs.org/guide/docs-as-code/).
 - **Commits.** Docs changes use the project's commit convention
   (for example `docs:` in Conventional Commits).
 - **Small steps.** Prefer many small docs pull requests over one rewrite.
+
+## Method for a docs change
+
+1. Branch with the code change (or on its own for docs-only work).
+2. Write the pages; run the project's docs build and link check locally.
+3. Commit with the project's convention; keep docs commits small.
+4. Open or update the pull request; ask for a docs review.
+
+## Decision rules
+
+- Generated or hand-written reference? Generate whatever the source can
+  express; hand-write only what it can't, and say which parts are generated.
+- Separate docs pull request? Only for docs-only improvements. Docs for a
+  change ride with the change.
+- A check the project lacks: propose it to the role that owns CI rather
+  than adding a parallel pipeline.
+
+## Failure modes
+
+- "Docs to follow" tickets that never land.
+- Docs in a wiki or drive that drift from the code.
+- Tutorials whose commands broke silently because nothing runs them.

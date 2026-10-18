@@ -5,6 +5,16 @@ description: Use when reviewing documentation in a pull request or auditing an e
 
 # Docs review
 
+## Method
+
+1. List the pull request's user-visible changes; check each has the docs it
+   owes (see `diataxis`, "What each kind of work owes").
+2. Place every changed page with the compass; flag passages of another kind.
+3. Check accuracy: run the commands, compare values with the source.
+4. Apply the checklist below (full version: `checklist.md` beside this file).
+5. Give a verdict: **pass**, **pass with should-fix**, or **blocked**. Any
+   open blocking finding means blocked; never pass a blocked review.
+
 Review each changed page, then the set. Blocking findings first.
 
 **Blocking**
@@ -27,4 +37,12 @@ Review each changed page, then the set. Blocking findings first.
 the compass, list the single next improvement per page, and fix them as
 separate small commits. Never propose a teardown.
 
-Report each finding with the file and line, the rule, and the fix.
+Report each finding with the file and line, the rule, and the fix. A check
+you could not run (no environment, a crash) is reported as **unverified**,
+never silently dropped.
+
+## Failure modes
+
+- Reviewing prose style while missing that the docs are absent.
+- Passing a tutorial nobody ran.
+- Asking for a rewrite instead of the next small fix.

@@ -14,4 +14,7 @@ const [form, truth] = await parallel([
   () => agent(`Following the technical-writer audience-and-research skill, check every command, value and claim in the docs changed by ${pr} against the code and, where safe, by running it. Run each tutorial from a clean start. List anything wrong with file, line and the correct fact.`, { phase: 'Check', label: 'accuracy' }),
 ])
 phase('Report')
-return await agent(`Merge these two reviews of ${pr} into one list, blocking findings first, no duplicates:\n${form}\n---\n${truth}`, { phase: 'Report', label: 'report' })
+const formText = form || 'UNVERIFIED: the form check returned no result.'
+const truthText = truth || 'UNVERIFIED: the accuracy check returned no result.'
+const report = await agent(`Merge these two reviews of ${pr} into one list, blocking findings first, no duplicates. Keep any UNVERIFIED note as a blocking item. End with a verdict per the docs-review skill: pass, pass with should-fix, or blocked.\n${formText}\n---\n${truthText}`, { phase: 'Report', label: 'report' })
+return report || `blocked: report agent returned no result.\n${formText}\n---\n${truthText}`

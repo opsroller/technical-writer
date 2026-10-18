@@ -23,3 +23,22 @@ description: Use before writing: to identify who the reader is and what they nee
 **Feedback.**
 - Watch where readers get stuck: issues, support questions, failed
   tutorial runs. Each one is a candidate for the next small improvement.
+
+## Method
+
+1. Write one line per audience: who, what they want, what they already know.
+2. Gather the subject: source, specs, tests, the running product, the builders.
+3. List the claims the page will make; mark each verified or not.
+4. Write only verified claims; send unverified ones as questions to the owner.
+5. After publishing, note where readers stumble and feed it back.
+
+## Quality bar
+
+- Every claim on the page can be traced to code, a run or a named person.
+- The page states its prerequisites or links to what teaches them.
+
+## Failure modes
+
+- Writing from a spec that the code no longer matches.
+- Writing for yourself, assuming knowledge the reader lacks.
+- One page trying to serve every audience at once.

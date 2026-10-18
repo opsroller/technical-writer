@@ -72,6 +72,39 @@ how-tos, reference examples growing into explanation.
   release, troubleshoot, contribute → how-to. First-run onboarding → tutorial.
   FAQ → split each answer into its kind.
 
+## What each kind of work owes
+
+| Work | Docs it owes |
+|---|---|
+| New feature or interface | reference for the interface; how-to if users must do something new; explanation if a design choice was made |
+| Behaviour change or bug fix | reference updated; changelog entry; troubleshooting how-to if users hit it |
+| Decision between alternatives | explanation (decision record style) |
+| New onboarding path or product | a tutorial, run from a clean start |
+| Removal or deprecation | reference and changelog; a migration how-to |
+
+## Method
+
+1. Name the reader and their need (`audience-and-research`).
+2. Ask the two compass questions; pick the kind.
+3. Find the existing page of that kind, or the folder it belongs in.
+4. Write to the kind's rules; link to its counterparts in the other kinds.
+5. Re-run the compass on each paragraph; move any that answer differently.
+
+## Decision rules
+
+- Unsure tutorial or how-to: is the reader learning or working? Not "is it basic".
+- Unsure reference or explanation: would they read it mid-task? Then reference.
+- A page wants two kinds: split it into two pages and link them.
+- No natural home: it is probably explanation that needs a "why" to bound it.
+
+## Failure modes
+
+- Tutorials that teach by explaining instead of by doing.
+- How-tos named after tool features instead of user goals.
+- Reference that drifts into advice, or is only auto-generated.
+- Explanation scattered as asides through other pages.
+- Four empty sections created before any content.
+
 ## Working
 
 Pick a page, assess it with the compass, make the single next improvement,

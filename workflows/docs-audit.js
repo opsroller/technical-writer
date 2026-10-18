@@ -24,8 +24,10 @@ const A = {
   required: ['findings'],
 }
 const assessed = await parallel(paths.map(p => () => agent(`Following the technical-writer diataxis and docs-review skills, assess ${p}. For each page say which kind it is now, what need it serves, where kinds are mixed, and the single next improvement. Do not propose rewrites.`, { schema: A, phase: 'Assess', label: `assess:${p}` })))
+const unassessed = paths.filter((p, i) => !assessed[i])
 const findings = assessed.filter(Boolean).flatMap(r => r.findings || [])
-if (!findings.length) return 'No improvements found.'
+if (!findings.length) return { improved: 'none', unassessed }
 phase('Improve')
 // One agent so commits never race on the same working tree.
-return await agent(`Following the technical-writer diataxis, technical-style and docs-as-code skills, make each of these next steps as its own small commit using the project's commit convention:\n${JSON.stringify(findings)}\nReport what you changed and what you left.`, { phase: 'Improve', label: 'improve' })
+const improved = await agent(`Following the technical-writer diataxis, technical-style and docs-as-code skills, make each of these next steps as its own small commit using the project's commit convention:\n${JSON.stringify(findings)}\nAfter each, re-check the page with the compass so it holds one kind. Report what you changed and what you left.`, { phase: 'Improve', label: 'improve' })
+return { improved: improved || 'improve agent returned no result', unassessed }

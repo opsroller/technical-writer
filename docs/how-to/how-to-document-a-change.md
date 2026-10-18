@@ -1,5 +1,7 @@
 # How to document a change before merging it
 
+How-to guide, for anyone using this plugin.
+
 This guide shows you how to produce every page a change owes, in the same
 pull request.
 
@@ -13,5 +15,5 @@ pull request.
 6. Commit the docs with the change using a `docs:` commit, or fold them into
    the change's own commit.
 
-See the [workflows reference](../reference/workflows.md#document-change) for
+See the [workflows reference](../reference/workflows/document-change.md) for
 arguments and phases.

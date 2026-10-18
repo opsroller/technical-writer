@@ -29,3 +29,18 @@ drawn from the Google developer documentation style guide
 - **No future promises.** Document what exists, not what is planned.
 - **Tone.** Friendly and direct, never flippant or condescending
   ("simply", "just", "obviously" are banned).
+
+## Method for an edit pass
+
+1. Read once as the reader: mark every place you stalled.
+2. Cut: words that add nothing, hedges, repeated explanations.
+3. Fix terms against the glossary; fix voice and tense.
+4. Check formatting: lists, code font, link text, alt text, headings.
+5. Read the commands and values against the product one last time.
+
+## Failure modes
+
+- Passive voice that hides who acts.
+- Synonyms for one concept ("project", "workspace", "repo" for the same thing).
+- Instructions buried after their conditions or inside long paragraphs.
+- Screenshots as the only carrier of an instruction.
