@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 export const meta = {
   name: 'document-change',
-  description: 'Work out which Diataxis docs a change owes, write each kind in parallel, then review the set. Run before merging a change. args: { change: "<branch, PR or short description>" }',
+  description: 'Work out which Diataxis docs a change owes, write each kind in parallel, review the set, then push it as a handoff for engineering-practices deliver-package or land-pr. Run before merging a change. args: { change: "<branch, PR or short description>" }',
   phases: [
     { title: 'Plan', detail: 'classify the change with the compass' },
     { title: 'Write', detail: 'one agent per doc kind' },
     { title: 'Review', detail: 'landing-page entries, then a read-only review (one kind per page, links, accuracy), one fix round and a re-review' },
+    { title: 'Handoff', detail: 'commit and push the docs, run the docs and link checks, return a handoff for engineering-practices deliver-package or land-pr' },
   ],
 }
 
@@ -168,5 +169,33 @@ if (review.blocking.length) {
   review = await agent(reviewPrompt, { schema: FINDINGS, phase: 'Review', label: 're-review', independent: true })
   if (!review) return { status: 'blocked', changed, open_findings: ['re-review returned no result; fixes unverified'] }
 }
-return { status: review.blocking.length ? 'blocked' : 'done', changed: [...new Set(changed)], open_findings: review.blocking }
+if (review.blocking.length) return { status: 'blocked', changed: [...new Set(changed)], open_findings: review.blocking }
+
+// The handoff is what engineering-practices deliver-package takes as
+// prior, so the docs ship without being written again.
+phase('Handoff')
+const HANDOFF = { type: 'object', properties: { branch: { type: 'string' }, pr: { type: 'string' }, head_sha: { type: 'string' }, tests_pass: { type: 'boolean' }, problem: { type: 'string' } }, required: ['branch', 'tests_pass'] }
+const pages = [...new Set([...plan.pages.map(p => p.path), ...changed])]
+const hand = await agent(
+  `Hand off the docs for ${change}. If you are on the default branch, cut a Conventional branch (docs/<slug>) from the latest remote default branch; otherwise stay on the current feature branch (the change's own branch, when it has one). Commit every page this run wrote or changed (${pages.join(', ') || 'as written'}), landing pages included, as Conventional Commits, and push. Run the project checks that apply (the docs build, link and style checks the project profile names, and its tests if the docs carry tested examples) on the pushed head. Do not open, mark ready or merge a PR: the engineering-practices workflow named in the result does that. Follow the engineering-practices git-workflow skill. Return the branch, any open PR, the head commit SHA, whether the checks pass on that head, and the problem if not.`,
+  { schema: HANDOFF, phase: 'Handoff', label: 'handoff' },
+)
+if (!hand || !hand.branch) return { status: 'blocked', changed: [...new Set(changed)], open_findings: [hand && hand.problem ? hand.problem : 'handoff step returned nothing; the docs may be uncommitted or unpushed'] }
+if (!hand.tests_pass) return { status: 'blocked', changed: [...new Set(changed)], open_findings: [`docs checks fail on ${hand.branch}${hand.head_sha ? ' at ' + hand.head_sha : ''}: ${hand.problem || 'no details'}`] }
+return {
+  status: 'done',
+  changed: [...new Set(changed)],
+  open_findings: review.blocking,
+  handoff: {
+    from: 'technical-writer:document-change',
+    branch: hand.branch,
+    pr: hand.pr || '',
+    head_sha: hand.head_sha || '',
+    tests_pass: true,
+    docs: pages,
+    undocumented: [],
+    notes: review.other || [],
+  },
+  next: 'ship it without rebuilding: /engineering-practices:deliver-package { wp: "<the package>", prior: <this result> }; with no work package, /engineering-practices:land-pr { branch: "<handoff.branch>" }',
+}
 })(RUN.agent, RUN.phase, RUN.log)]); return RUN.finish(RUN_OUT)
