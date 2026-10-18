@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 export const meta = {
   name: 'document-change',
-  description: 'Work out which Diataxis docs a change owes, write each kind in parallel, then review the set',
-  whenToUse: 'Before merging a change. args: { change: "<branch, PR or short description>" }',
+  description: 'Work out which Diataxis docs a change owes, write each kind in parallel, then review the set. Run before merging a change. args: { change: "<branch, PR or short description>" }',
   phases: [
     { title: 'Plan', detail: 'classify the change with the compass' },
     { title: 'Write', detail: 'one agent per doc kind' },
@@ -36,6 +35,6 @@ const plan = await agent(`Following the technical-writer diataxis and audience-a
 if (!plan || !plan.pages.length) return plan
 phase('Write')
 const kinds = [...new Set(plan.pages.map(p => p.kind))]
-const written = await parallel(kinds.map(k => () => agent(`Following the technical-writer diataxis, technical-style and docs-as-code skills, write the ${k} pages for this change (${change}):\n${JSON.stringify(plan.pages.filter(p => p.kind === k))}\nKeep each page to the ${k} rules only, verify every command and claim against the product, link to the related pages of other kinds, and update the landing page that indexes them. Report the files changed.`, { phase: 'Write', label: k })))
+const written = await parallel(kinds.map(k => () => agent(`Following the technical-writer diataxis, technical-style and docs-as-code skills, write the ${k} pages for this change (${change}):\n${JSON.stringify(plan.pages.filter(p => p.kind === k))}\nKeep each page to the ${k} rules only, verify every command and claim against the product, and link to the related pages of other kinds. Do not edit landing or index pages; other writers run at the same time. Report the files changed and, for each new page, the one-line index entry it needs.`, { phase: 'Write', label: k })))
 phase('Review')
-return await agent(`Following the technical-writer docs-review skill, review the docs just written for ${change}:\n${JSON.stringify(written)}\nFix blocking findings directly; list anything left with file, rule and fix.`, { phase: 'Review', label: 'review' })
+return await agent(`Following the technical-writer docs-review skill, review the docs just written for ${change}:\n${JSON.stringify(written)}\nFirst apply every reported index entry to the landing pages in one edit. Then fix blocking findings directly; list anything left with file, rule and fix.`, { phase: 'Review', label: 'review' })

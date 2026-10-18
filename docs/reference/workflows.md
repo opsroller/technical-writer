@@ -8,7 +8,7 @@ Claude Code workflow scripts in `workflows/`, run as `/technical-writer:<name>`.
 |---|---|
 | File | `workflows/document-change.js` |
 | Args | `{ change: string }`: branch, pull request or description. Required. |
-| Phases | Plan (one agent), Write (one agent per doc kind, parallel), Review (one agent) |
+| Phases | Plan (one agent), Write (one agent per doc kind, parallel; writers don't touch index pages), Review (one agent; applies index entries, then reviews) |
 | Returns | review result: files changed, remaining findings; or the plan when no pages are needed |
 
 ## docs-audit
@@ -17,8 +17,8 @@ Claude Code workflow scripts in `workflows/`, run as `/technical-writer:<name>`.
 |---|---|
 | File | `workflows/docs-audit.js` |
 | Args | `{ paths: string[] }`: doc files or folders. Required. |
-| Phases | Assess (one agent per path), Improve (one agent per assessed path, pipelined) |
-| Returns | per path: commits made and findings left |
+| Phases | Assess (one agent per path, parallel), Improve (one agent, one commit per finding) |
+| Returns | commits made and findings left |
 
 ## docs-review
 

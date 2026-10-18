@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 export const meta = {
   name: 'docs-review',
-  description: 'Review the documentation in a pull request against the Diataxis checklist, with accuracy checked in parallel',
-  whenToUse: 'On a pull request that changes behaviour or docs. args: { pr: "<pull request or branch>" }',
+  description: 'Review the documentation in a pull request against the Diataxis checklist, with accuracy checked in parallel. args: { pr: "<pull request or branch>" }',
   phases: [
     { title: 'Check', detail: 'kinds and style; accuracy against the product' },
     { title: 'Report', detail: 'one merged list, blocking first' },
