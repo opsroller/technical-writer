@@ -1,5 +1,7 @@
 # How to improve existing docs
 
+How-to guide, for anyone using this plugin.
+
 This guide shows you how to bring an existing docs set in line with Diataxis
 without a rewrite.
 
@@ -11,4 +13,4 @@ without a rewrite.
    step further.
 
 If a page mixes kinds, the usual fix is to move the stray passage to a page
-of its own kind and link to it. See the [diataxis skill](../reference/skills.md#diataxis).
+of its own kind and link to it. See the [diataxis skill](../reference/skills/diataxis.md).

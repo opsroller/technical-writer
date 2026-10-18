@@ -1,5 +1,7 @@
 # Agent
 
+Reference, for plugin users and maintainers.
+
 | Field | Value |
 |---|---|
 | File | `agents/technical-writer.md` |

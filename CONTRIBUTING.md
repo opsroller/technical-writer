@@ -1,5 +1,7 @@
 # How to contribute to this plugin
 
+How-to guide, for contributors.
+
 1. Branch from `main` and make the change.
 2. Put each doc change in the right `docs/<kind>/` folder (see
    [About Diataxis](docs/explanation/about-diataxis.md)); update the

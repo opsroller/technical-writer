@@ -1,5 +1,7 @@
 # How to review docs in a pull request
 
+How-to guide, for anyone using this plugin.
+
 This guide shows you how to review a pull request's documentation for form
 and accuracy.
 
@@ -9,4 +11,4 @@ and accuracy.
 4. If the pull request changes behaviour and has no docs at all, request
    `/technical-writer:document-change` on it instead of reviewing line by line.
 
-The checklist the review uses is in the [docs-review skill](../reference/skills.md#docs-review).
+The checklist the review uses is in the [docs-review skill](../reference/skills/docs-review.md).

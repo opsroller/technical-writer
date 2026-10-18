@@ -1,6 +1,6 @@
 # About Diataxis
 
-Explanation: why this plugin structures documentation with Diataxis, and how
+Explanation, for writers and reviewers: why this plugin structures documentation with Diataxis, and how
 it sits alongside style guides.
 
 ## The idea
