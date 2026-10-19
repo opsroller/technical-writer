@@ -1,6 +1,6 @@
 ---
 name: docs-as-code
-description: Use when setting up, changing or shipping documentation in a repository: layout, plain-text markup, review, automated checks, versioning and changelogs.
+description: 'Use when setting up, changing or shipping documentation in a repository: layout, plain-text markup, review, automated checks, versioning and changelogs.'
 ---
 
 # Docs as code

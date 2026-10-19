@@ -1,6 +1,6 @@
 ---
 name: audience-and-research
-description: Use before writing: to identify who the reader is and what they need, and to learn the subject well enough to document it accurately.
+description: 'Use before writing: to identify who the reader is and what they need, and to learn the subject well enough to document it accurately.'
 ---
 
 # Audience and research
