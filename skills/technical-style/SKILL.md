@@ -1,6 +1,6 @@
 ---
 name: technical-style
-description: Use when writing or editing any documentation sentence: voice, clarity, terminology, formatting, accessibility and global readers.
+description: 'Use when writing or editing any documentation sentence: voice, clarity, terminology, formatting, accessibility and global readers.'
 ---
 
 # Technical style
